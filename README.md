@@ -10,11 +10,16 @@ The project is organized into the following directories and files:
 
 - **CODE/**: Contains Python scripts for running various models and checking system capabilities.
   - `check_cuda_availability.py`: Checks the availability of CUDA (GPU support) using PyTorch.
-  - `huggingface_causallm_gpt2.py`: Loads and runs the GPT-2 model using the AutoModelForCausalLM class.
-  - `huggingface_embed_bert.py`: Loads and runs a BERT model for embedding extraction using Hugging Face's AutoModel.
-  - `huggingface_seq2seq_t5.py`: Loads the Google Flan-T5 model for sequence-to-sequence tasks.
-  - `llama_gguf_llm_minicpm_watch_time.py`: Measures the execution time of generating a response from a LLaMA GGUF model.
-  - `llama_gguf_llm_minicpm.py`: Loads and runs a LLaMA GGUF model optimized for CPU usage.
+  - `hf_transformers_automodel_minicpmo.py`: Loads and runs the MiniCPM-o-2_6 model for multimodal tasks.
+  - `hf_transformers_causallm_gpt2.py`: Loads and runs the GPT-2 model using the AutoModelForCausalLM class.
+  - `hf_transformers_embed_bert.py`: Loads and runs a BERT model for embedding extraction using Hugging Face's AutoModel.
+  - `hf_transformers_image_captioning_blip2.py`: Loads and runs the BLIP-2 model for image captioning tasks.
+  - `hf_transformers_multimodalcausallm_janus.py`: Loads and runs the Janus-Pro-1B model for multimodal causal language tasks.
+  - `hf_transformers_seq2seq_t5.py`: Loads the Google Flan-T5 model for sequence-to-sequence tasks.
+  - `llama_llm_minicpm_watch_time.py`: Measures the execution time of generating a response from a LLaMA GGUF model.
+  - `llama_llm_minicpm.py`: Loads and runs a LLaMA GGUF model optimized for CPU usage.
+  - `lmdeploy_image_description.py`: Loads and runs the InternVL2-1B model for image description tasks.
+
 
 ## Usage
 To use the scripts in this project, ensure you have the necessary dependencies installed, including PyTorch and Hugging Face's Transformers library. Each script can be run independently to perform specific tasks related to language models.

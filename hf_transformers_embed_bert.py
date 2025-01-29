@@ -1,4 +1,4 @@
-# FILE: huggingface_embed_bert.py
+# FILE: hf_transformers_embed_bert.py
 """
 This script uses Hugging Face's AutoModel and AutoTokenizer to load and run various pretrained models.
 AutoModel is a flexible interface in the Hugging Face 'transformers' library that allows loading and running a wide variety of models.
@@ -24,17 +24,31 @@ https://huggingface.co/transformers/model_doc/auto.html
 
 
 from transformers import AutoModel, AutoTokenizer
+import torch  # Import torch to check for CUDA support
+
+# Check if CUDA is available and choose the appropriate device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# Set a manual seed for reproducibility
+torch.manual_seed(100)
 
 # Load a BERT model compatible with AutoModel for classification tasks
-model_name = "bert-base-uncased" # BERT model for classification or embedding extraction
-model = AutoModel.from_pretrained(model_name) # Load the model
-tokenizer = AutoTokenizer.from_pretrained(model_name)  # Tokenizer for the same model
+model_name = "bert-base-uncased"  # BERT model for classification or embedding extraction
+
+# Load the model and move it to the device (GPU if available)
+model = AutoModel.from_pretrained(model_name).eval().to(device)  # Set model to evaluation mode and move it to the appropriate device GPU or CPU
+
+# Load the tokenizer for the model
+tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 # Input text
 input_text = "What is the capital of France?"
 
 # Tokenize the input (convert input text to token IDs)
 inputs = tokenizer(input_text, return_tensors="pt")  # 'pt' stands for PyTorch tensors
+
+# Move inputs to the same device as the model (GPU if available)
+inputs = {key: value.to(device) for key, value in inputs.items()}
 
 # Print raw tokens (token IDs)
 print("Raw token IDs:", inputs['input_ids'])

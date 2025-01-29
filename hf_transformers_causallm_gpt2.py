@@ -1,4 +1,4 @@
-# FILE: huggingface_causallm_gpt2.py
+# FILE: hf_transformers_causallm_gpt2.py
 """
 This script uses Hugging Face's AutoModelForCausalLM and AutoTokenizer to load and run various pretrained causal language models.
 AutoModelForCausalLM is a flexible interface in the Hugging Face 'transformers' library that allows loading and running a variety of causal language models.
@@ -11,19 +11,33 @@ In this example, we will load a pretrained causal language model, tokenize input
 """
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch  # Import torch to check for CUDA support
+
+# Check if CUDA is available and choose the appropriate device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# Set a manual seed for reproducibility
+torch.manual_seed(100)
 
 # Load a pretrained causal language model and its tokenizer
 model_name = "gpt2"  # Example model; you can replace it with any other causal language model
-model = AutoModelForCausalLM.from_pretrained(model_name) # Load the causal language model
-tokenizer = AutoTokenizer.from_pretrained(model_name) # Tokenizer for the model
+
+# Load the model and move it to the device (GPU if available)
+model = AutoModelForCausalLM.from_pretrained(model_name).eval().to(device)  # Set model to evaluation mode and move it to the appropriate device GPU or CPU
+
+# Load the tokenizer for the model
+tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 # Input text for the model to process
 input_text = "Once upon a time in a land far away,"
 
-# Tokenize the input text
-inputs = tokenizer(input_text, return_tensors="pt")
+# Tokenize the input text (convert input text to token IDs)
+inputs = tokenizer(input_text, return_tensors="pt")  # 'pt' stands for PyTorch tensors
 
-# Generate model output
+# Move inputs to the same device as the model (GPU if available)
+inputs = {key: value.to(device) for key, value in inputs.items()}
+
+# Generate model output (text continuation)
 outputs = model.generate(**inputs, max_length=50)
 
 # Decode the generated output to human-readable text
