@@ -5,10 +5,15 @@ The model used here is "deepseek-ai/Janus-Pro-1B", which is designed for tasks i
 In this example, we will load a pretrained multimodal causal language model, process an input image, generate a response to a question about the image, and print the generated response.
 '''
 
-import torch
-from transformers import AutoModelForCausalLM
-from janus.models import MultiModalityCausalLM, VLChatProcessor
-from janus.utils.io import load_pil_images
+# Import necessary libraries
+import time  # Library for time-related functions
+import torch # Library for tensor computations and GPU support
+from transformers import AutoModelForCausalLM # Import AutoModelForCausalLM from Hugging Face
+from janus.models import MultiModalityCausalLM, VLChatProcessor # Import MultiModalityCausalLM and VLChatProcessor from Janus
+from janus.utils.io import load_pil_images # Import function to load PIL images
+
+# Start the stopwatch
+start_time = time.time()
 
 # Check if CUDA (GPU support) is available and set the device accordingly
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -39,6 +44,8 @@ prepare_inputs = vl_chat_processor(
     conversations=conversation, images=pil_images, force_batchify=True
 ).to(vl_gpt.device)
 
+# Measure response time
+response_start_time = time.time()
 # # run image encoder to get the image embeddings
 inputs_embeds = vl_gpt.prepare_inputs_embeds(**prepare_inputs)
 
@@ -54,5 +61,13 @@ outputs = vl_gpt.language_model.generate(
     use_cache=True,
 )
 
+response_time = time.time() - response_start_time
+
 answer = tokenizer.decode(outputs[0].cpu().tolist(), skip_special_tokens=True)
 print(f"{prepare_inputs['sft_format'][0]}", answer)
+
+# Stop the stopwatch
+elapsed_time = time.time() - start_time
+
+print(f"Total execution time: {elapsed_time:.2f} seconds")
+print(f"Response generation time: {response_time:.2f} seconds")

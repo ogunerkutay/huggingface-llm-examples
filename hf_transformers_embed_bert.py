@@ -22,9 +22,13 @@ For more details on AutoModel and AutoTokenizer, refer to the Hugging Face docum
 https://huggingface.co/transformers/model_doc/auto.html
 """
 
-
-from transformers import AutoModel, AutoTokenizer
+# Import necessary libraries
+import time  # Library for time-related functions
+from transformers import AutoModel, AutoTokenizer # Import AutoModel and AutoTokenizer from Hugging Face
 import torch  # Import torch to check for CUDA support
+
+# Start the stopwatch
+start_time = time.time()
 
 # Check if CUDA is available and choose the appropriate device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -50,6 +54,13 @@ inputs = tokenizer(input_text, return_tensors="pt")  # 'pt' stands for PyTorch t
 # Move inputs to the same device as the model (GPU if available)
 inputs = {key: value.to(device) for key, value in inputs.items()}
 
+# Measure response time
+response_start_time = time.time()
+# Generate model output (e.g., embeddings or hidden states)
+outputs = model(**inputs)
+response_time = time.time() - response_start_time
+
+
 # Print raw tokens (token IDs)
 print("Raw token IDs:", inputs['input_ids'])
 
@@ -62,3 +73,9 @@ outputs = model(**inputs)
 
 # Print the output (e.g., model's hidden states or embeddings)
 print("Model Output:", outputs)
+
+# Stop the stopwatch
+elapsed_time = time.time() - start_time
+
+print(f"Total execution time: {elapsed_time:.2f} seconds")
+print(f"Response generation time: {response_time:.2f} seconds")

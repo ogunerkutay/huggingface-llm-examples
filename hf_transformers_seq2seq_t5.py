@@ -7,9 +7,14 @@ These models are designed for tasks such as text generation, translation, summar
 In this example, we will load a pretrained Seq2Seq model, tokenize input text, generate output, and print the generated text.
 """
 
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+# Import necessary libraries
+import time  # Library for time-related functions
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer # Import AutoModelForSeq2SeqLM and AutoTokenizer from Hugging Face
 import torch  # Import torch to check for CUDA support
 import torch  # Import torch to check for CUDA support
+
+# Start the stopwatch
+start_time = time.time()
 
 # Check if CUDA is available and choose the appropriate device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -35,11 +40,20 @@ inputs = tokenizer(input_text, return_tensors="pt")  # 'pt' stands for PyTorch t
 # Move inputs to the same device as the model (GPU if available)
 inputs = {key: value.to(device) for key, value in inputs.items()}
 
+# Measure response time
+response_start_time = time.time()
 # Generate model output using the `generate()` method to get human-readable text
 generated_ids = model.generate(**inputs, max_length=50)
+response_time = time.time() - response_start_time
 
 # Decode the generated IDs back into human-readable text
 generated_text = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
 
 # Print the final generated text
 print(generated_text)
+
+# Stop the stopwatch
+elapsed_time = time.time() - start_time
+
+print(f"Total execution time: {elapsed_time:.2f} seconds")
+print(f"Response generation time: {response_time:.2f} seconds")

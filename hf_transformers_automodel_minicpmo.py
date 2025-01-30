@@ -6,9 +6,13 @@ In this example, we will load a pretrained vision-language model, process an inp
 """
 
 # Import necessary libraries
+import time  # Library for time-related functions
 import torch  # Library for tensor computations and GPU support
 from PIL import Image  # Library for image processing
 from transformers import AutoModel, AutoTokenizer  # Hugging Face libraries for model and tokenizer
+
+# Start the stopwatch
+start_time = time.time()
 
 # Check if CUDA is available and set the device accordingly
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -33,20 +37,32 @@ image = Image.open(r"C:\sise.jpeg").convert('RGB')  # Convert image to RGB forma
 question = "What is the landform in the picture?"  # Define the question to ask about the image
 msgs = [{'role': 'user', 'content': [image, question]}]  # Create a message with the image and question
 
+# Measure response time
+response_start_time = time.time()
 # Generate an answer using the model's chat method
 answer = model.chat(
     msgs=msgs,  # Pass the messages to the model
     tokenizer=tokenizer  # Use the tokenizer for processing
 )
+response_time = time.time() - response_start_time
 print(answer)  # Print the generated answer
 
 # Second round chat, pass history context of multi-turn conversation
 msgs.append({"role": "assistant", "content": [answer]})  # Add the model's previous answer to the conversation history
 msgs.append({"role": "user", "content": ["What should I pay attention to when traveling here?"]})  # Add a new question
 
+# Measure response time for second round
+response_start_time = time.time()
 # Generate another answer using the model's chat method
 answer = model.chat(
     msgs=msgs,  # Pass the updated messages to the model
     tokenizer=tokenizer  # Use the tokenizer for processing
 )
+response_time += time.time() - response_start_time
 print(answer)  # Print the generated answer
+
+# Stop the stopwatch
+elapsed_time = time.time() - start_time
+
+print(f"Total execution time: {elapsed_time:.2f} seconds")
+print(f"Response generation time: {response_time:.2f} seconds")

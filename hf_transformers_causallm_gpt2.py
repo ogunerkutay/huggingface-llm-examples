@@ -10,8 +10,13 @@ They are typically used in applications such as chatbots, story generation, and 
 In this example, we will load a pretrained causal language model, tokenize input text, generate output, and print the generated response.
 """
 
-from transformers import AutoModelForCausalLM, AutoTokenizer
+# Import necessary libraries
+import time  # Library for time-related functions
+from transformers import AutoModelForCausalLM, AutoTokenizer # Import AutoModelForCausalLM and AutoTokenizer from Hugging Face
 import torch  # Import torch to check for CUDA support
+
+# Start the stopwatch
+start_time = time.time()
 
 # Check if CUDA is available and choose the appropriate device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -37,11 +42,20 @@ inputs = tokenizer(input_text, return_tensors="pt")  # 'pt' stands for PyTorch t
 # Move inputs to the same device as the model (GPU if available)
 inputs = {key: value.to(device) for key, value in inputs.items()}
 
+# Measure response time
+response_start_time = time.time()
 # Generate model output (text continuation)
 outputs = model.generate(**inputs, max_length=50)
+response_time = time.time() - response_start_time
 
 # Decode the generated output to human-readable text
 response = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
 # Print the generated response
 print("Generated Response:", response)
+
+# Stop the stopwatch
+elapsed_time = time.time() - start_time
+
+print(f"Total execution time: {elapsed_time:.2f} seconds")
+print(f"Response generation time: {response_time:.2f} seconds")
