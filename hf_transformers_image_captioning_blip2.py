@@ -10,22 +10,42 @@ import time  # Library for time-related functions
 from PIL import Image  # Library for image processing
 from transformers import Blip2Processor, Blip2ForConditionalGeneration  # Hugging Face libraries for BLIP-2 model
 import torch  # Library for tensor computations and GPU support
+from huggingface_hub import scan_cache_dir # Import function to scan the cache directory
 
 # Start the stopwatch
 start_time = time.time()
-
-# Check if CUDA (GPU support) is available and set the device accordingly
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Set a manual seed for reproducibility
 torch.manual_seed(100)
 
 # Define the model name
 model_name = "Salesforce/blip2-opt-2.7b"
+print(f"Model name: {model_name}")
+
+# Check if CUDA (GPU support) is available and set the device accordingly
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Device: {device}")
 
 # Load the BLIP-2 processor and model from the Hugging Face model hub
 processor = Blip2Processor.from_pretrained(model_name)  # Load the processor
 model = Blip2ForConditionalGeneration.from_pretrained(model_name).eval().to(device)  # Set model to evaluation mode and move it to the appropriate device GPU or CPU
+
+# Calculate the number of parameters
+param_size = sum(p.numel() for p in model.parameters())
+
+# Get cache information
+cache_info = scan_cache_dir()
+model_cache_info = next((item for item in cache_info.repos if model_name in item.repo_id), None)
+
+# Calculate the file size of the model
+if model_cache_info:
+    file_size = model_cache_info.size_on_disk
+else:
+    file_size = 0
+
+# Print the parameter size and file size
+print(f"Parameter size: {param_size}")
+print(f"File size: {file_size}")
 
 # Load the input image
 image = Image.open(r"C:\sise.jpeg")

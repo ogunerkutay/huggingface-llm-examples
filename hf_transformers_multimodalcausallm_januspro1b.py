@@ -1,4 +1,4 @@
-# FILE: hf_transformers_multimodalcausallm_janus.py
+# FILE: hf_transformers_multimodalcausallm_januspro1b.py
 '''
 This script uses the Janus library along with Hugging Face's AutoModelForCausalLM to load and run a multimodal causal language model.
 The model used here is "deepseek-ai/Janus-Pro-1B", which is designed for tasks involving both text and images.
@@ -11,20 +11,41 @@ import torch # Library for tensor computations and GPU support
 from transformers import AutoModelForCausalLM # Import AutoModelForCausalLM from Hugging Face
 from janus.models import MultiModalityCausalLM, VLChatProcessor # Import MultiModalityCausalLM and VLChatProcessor from Janus
 from janus.utils.io import load_pil_images # Import function to load PIL images
+from huggingface_hub import scan_cache_dir # Import function to scan the cache directory
 
 # Start the stopwatch
 start_time = time.time()
 
-# Check if CUDA (GPU support) is available and set the device accordingly
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 # specify the path to the model
 model_name = "deepseek-ai/Janus-Pro-1B"
+print(f"Model name: {model_name}")
+
+# Check if CUDA (GPU support) is available and set the device accordingly
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Device: {device}")
+
 vl_chat_processor: VLChatProcessor = VLChatProcessor.from_pretrained(model_name)
 tokenizer = vl_chat_processor.tokenizer
 
 vl_gpt: MultiModalityCausalLM = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True)
 vl_gpt = vl_gpt.to(torch.bfloat16).eval().to(device)  # Set model to evaluation mode and move it to the appropriate device GPU or CPU
+
+# Calculate the number of parameters
+param_size = sum(p.numel() for p in vl_gpt.parameters())
+
+# Get cache information
+cache_info = scan_cache_dir()
+model_cache_info = next((item for item in cache_info.repos if model_name in item.repo_id), None)
+
+# Calculate the file size of the model
+if model_cache_info:
+    file_size = model_cache_info.size_on_disk
+else:
+    file_size = 0
+
+# Print the parameter size and file size
+print(f"Parameter size: {param_size}")
+print(f"File size: {file_size}")
 
 image = r"C:\sise.jpeg"
 question = "What is in the image?"

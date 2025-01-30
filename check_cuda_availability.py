@@ -5,8 +5,9 @@ It prints the PyTorch version, CUDA availability, CUDA version, number of GPUs, 
 Additionally, it runs the `nvidia-smi` command to fetch and print the NVIDIA System Management Interface output.
 '''
 
-import torch
-import os
+# Import necessary libraries
+import torch # Import PyTorch library
+import os # Import os module for system commands
 
 def test_pytorch_and_cuda():
     print("="*50)
