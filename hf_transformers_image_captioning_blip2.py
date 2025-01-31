@@ -7,9 +7,9 @@ In this example, we will load a pretrained BLIP-2 model, process an input image,
 
 # Import necessary libraries
 import time  # Library for time-related functions
+import torch  # Import torch to check for CUDA support
 from PIL import Image  # Library for image processing
 from transformers import Blip2Processor, Blip2ForConditionalGeneration  # Hugging Face libraries for BLIP-2 model
-import torch  # Library for tensor computations and GPU support
 from huggingface_hub import scan_cache_dir # Import function to scan the cache directory
 
 # Start the stopwatch
@@ -22,13 +22,14 @@ torch.manual_seed(100)
 model_name = "Salesforce/blip2-opt-2.7b"
 print(f"Model name: {model_name}")
 
-# Check if CUDA (GPU support) is available and set the device accordingly
+# Check if CUDA is available and choose the appropriate device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Device: {device}")
 
 # Load the BLIP-2 processor and model from the Hugging Face model hub
-processor = Blip2Processor.from_pretrained(model_name)  # Load the processor
-model = Blip2ForConditionalGeneration.from_pretrained(model_name).eval().to(device)  # Set model to evaluation mode and move it to the appropriate device GPU or CPU
+processor = Blip2Processor.from_pretrained(model_name)  # Load the processor for the image captioning model
+model = Blip2ForConditionalGeneration.from_pretrained(model_name)
+model = model.eval().to(device)  # Set model to evaluation mode and move it to the appropriate device GPU or CPU
 
 # Calculate the number of parameters
 param_size = sum(p.numel() for p in model.parameters())
@@ -56,11 +57,10 @@ inputs = processor(image, return_tensors="pt").to(device)  # Move inputs to the 
 # Measure response time
 response_start_time = time.time()
 # Generate a caption for the input image using the model's generate() method
-caption_ids = model.generate(**inputs, max_new_tokens=100)
+outputs = model.generate(**inputs, max_new_tokens=100)
+# Decode the generated output to human-readable text
+caption = processor.decode(outputs[0], skip_special_tokens=True)
 response_time = time.time() - response_start_time
-
-# Decode the generated caption IDs back into human-readable text
-caption = processor.decode(caption_ids[0], skip_special_tokens=True)
 
 # Print the final generated caption
 print(f"Image Caption: {caption}")

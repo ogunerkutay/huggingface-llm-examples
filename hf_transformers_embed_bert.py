@@ -24,8 +24,8 @@ https://huggingface.co/transformers/model_doc/auto.html
 
 # Import necessary libraries
 import time  # Library for time-related functions
-from transformers import AutoModel, AutoTokenizer # Import AutoModel and AutoTokenizer from Hugging Face
 import torch  # Import torch to check for CUDA support
+from transformers import AutoModel, AutoTokenizer # Import AutoModel and AutoTokenizer from Hugging Face
 from huggingface_hub import scan_cache_dir # Import function to scan the cache directory
 
 # Start the stopwatch
@@ -43,7 +43,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Device: {device}")
 
 # Load the model and move it to the device (GPU if available)
-model = AutoModel.from_pretrained(model_name).eval().to(device)  # Set model to evaluation mode and move it to the appropriate device GPU or CPU
+model = AutoModel.from_pretrained(model_name)
+model = model.eval().to(device)  # Set model to evaluation mode and move it to the appropriate device GPU or CPU
 
 # Calculate the number of parameters
 param_size = sum(p.numel() for p in model.parameters())
@@ -65,11 +66,18 @@ print(f"File size: {file_size}")
 # Load the tokenizer for the model
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-# Input text
-input_text = "What is the capital of France?"
+# Prompt for the model to process
+prompt = "What is the capital of France?"
 
-# Tokenize the input (convert input text to token IDs)
-inputs = tokenizer(input_text, return_tensors="pt")  # 'pt' stands for PyTorch tensors
+# Tokenize the prompt to convert it into a format the model can understand (input token ids)
+inputs = tokenizer(prompt, return_tensors="pt")  # 'pt' stands for PyTorch tensors
+
+# Print raw tokens (token IDs)
+print("Raw token IDs:", inputs['input_ids'])
+
+# Decode the tokens to human-readable form
+decoded_text = tokenizer.decode(inputs['input_ids'][0], skip_special_tokens=True)
+print("Human-readable text:", decoded_text)
 
 # Move inputs to the same device as the model (GPU if available)
 inputs = {key: value.to(device) for key, value in inputs.items()}
@@ -79,17 +87,6 @@ response_start_time = time.time()
 # Generate model output (e.g., embeddings or hidden states)
 outputs = model(**inputs)
 response_time = time.time() - response_start_time
-
-
-# Print raw tokens (token IDs)
-print("Raw token IDs:", inputs['input_ids'])
-
-# Decode the tokens to human-readable form
-decoded_text = tokenizer.decode(inputs['input_ids'][0], skip_special_tokens=True)
-print("Human-readable text:", decoded_text)
-
-# Generate model output (e.g., embeddings or hidden states)
-outputs = model(**inputs)
 
 # Print the output (e.g., model's hidden states or embeddings)
 print("Model Output:", outputs)

@@ -16,16 +16,19 @@ from huggingface_hub import scan_cache_dir # Import function to scan the cache d
 # Start the stopwatch
 start_time = time.time()
 
-# specify the path to the model
+# Set a manual seed for reproducibility
+torch.manual_seed(100)
+
+# Define the model name
 model_name = "deepseek-ai/Janus-Pro-1B"
 print(f"Model name: {model_name}")
 
-# Check if CUDA (GPU support) is available and set the device accordingly
+# Check if CUDA is available and choose the appropriate device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Device: {device}")
 
-vl_chat_processor: VLChatProcessor = VLChatProcessor.from_pretrained(model_name)
-tokenizer = vl_chat_processor.tokenizer
+vl_chat_processor: VLChatProcessor = VLChatProcessor.from_pretrained(model_name) # Load the processor for the multimodal causal language model
+tokenizer = vl_chat_processor.tokenizer # Get the tokenizer from the processor
 
 vl_gpt: MultiModalityCausalLM = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True)
 vl_gpt = vl_gpt.to(torch.bfloat16).eval().to(device)  # Set model to evaluation mode and move it to the appropriate device GPU or CPU
@@ -82,10 +85,11 @@ outputs = vl_gpt.language_model.generate(
     use_cache=True,
 )
 
+response = tokenizer.decode(outputs[0].cpu().tolist(), skip_special_tokens=True)
+
 response_time = time.time() - response_start_time
 
-answer = tokenizer.decode(outputs[0].cpu().tolist(), skip_special_tokens=True)
-print(f"{prepare_inputs['sft_format'][0]}", answer)
+print(f"{prepare_inputs['sft_format'][0]}", response)
 
 # Stop the stopwatch
 elapsed_time = time.time() - start_time

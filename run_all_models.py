@@ -9,12 +9,15 @@ import pandas as pd # Library for data manipulation and analysis
 
 # List of scripts to run
 scripts = [
-    "hf_transformers_causallm_gpt2.py",
-    "hf_transformers_embed_bert.py",
-    "hf_transformers_image_captioning_blip2.py",
-    "hf_transformers_multimodalcausallm_januspro1b.py",
-    "hf_transformers_seq2seq_flant5large.py",
-    "llama_gguf_minicpmo.py"
+        "hf_transformers_causallm_gemma2b_cpu.py",
+        "hf_transformers_causallm_gemma2b_flash_attention2.py",
+        "hf_transformers_causallm_gemma2b_gpu_4bit.py",
+        "hf_transformers_causallm_gemma2b_gpu_bfloat16.py",
+        "hf_transformers_causallm_gemma2b_gpu_float16.py",
+        "hf_transformers_causallm_gemma2b_gpu_int8.py",
+        "hf_transformers_causallm_gemma2b_gpu.py",
+        "llama_gguf_gemma2b.py",
+        "hf_transformers_pipeline_gemma2b.py"
 ]
 
 
@@ -28,7 +31,7 @@ for script in scripts:
         # Run the script and capture the output
         result = subprocess.run(["python", script], capture_output=True, text=True)
         output = result.stdout
-        #print(f"Output from {script}:\n{output}")
+        print(f"Output from {script}:\n{output}")
 
         # Extract the relevant information from the output
         model_name = None

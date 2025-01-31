@@ -7,13 +7,16 @@ In this example, we will load a pretrained vision-language model, process an inp
 
 # Import necessary libraries
 import time  # Library for time-related functions
+import torch  # Import torch to check for CUDA support
 from lmdeploy import pipeline, TurbomindEngineConfig  # Import pipeline and configuration for the engine
 from lmdeploy.vl import load_image  # Import function to load images
 from huggingface_hub import scan_cache_dir # Import function to scan the cache directory
-import torch  # Library for tensor computations and GPU support
 
 # Start the stopwatch
 start_time = time.time()
+
+# Set a manual seed for reproducibility
+torch.manual_seed(100)
 
 # Define the model name and configuration
 model_name = 'OpenGVLab/InternVL2-1B'  # Vision-language model for image description

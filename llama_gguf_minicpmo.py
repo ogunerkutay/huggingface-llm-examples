@@ -26,7 +26,7 @@ print(f"Model name: {model_name}")
 device = "cpu"  # Set the device to CPU
 print(f"Device: {device}")
 
-llm = Llama.from_pretrained(
+model = Llama.from_pretrained(
     repo_id= model_name,
     filename="Model-7.6B-Q5_K_M.gguf",
     n_ctx=0,
@@ -35,9 +35,8 @@ llm = Llama.from_pretrained(
     verbose=False
 )
 
-# Retrieve and print the parameter size
+# Retrieve the parameter size
 param_size = 0
-print(f"Parameter size: {param_size}")
 
 # Get cache information
 cache_info = scan_cache_dir()
@@ -53,17 +52,23 @@ else:
 print(f"Parameter size: {param_size}")
 print(f"File size: {file_size}")
 
-messages = [
+# Prompt for the model to process
+prompt = "What is the capital of France?"
+
+""" messages = [
     {"role": "system", "content": "You are a helpful assistant."},  # Optional system message
-    {"role": "user", "content": "What is the capital of France?"},
-]
+    {"role": "user", "content": prompt},
+] """
 
 # Measure response time
 response_start_time = time.time()
-response = llm.create_chat_completion(messages=messages)
+#response = model.create_chat_completion(messages=messages)
+response = model(prompt, max_tokens=512, echo=False)
 response_time = time.time() - response_start_time
 
-print(response['choices'][0]['message']['content'])
+# Print the generated response
+#print("Generated Response:", response['choices'][0]['message']['content'])
+print("Generated Response:", response['choices'][0]['text'].split('\n')[0].strip())
 
 # Stop the stopwatch
 elapsed_time = time.time() - start_time

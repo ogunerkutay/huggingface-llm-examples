@@ -8,26 +8,27 @@ In this example, we will load a pretrained vision-language model, process an inp
 # Import necessary libraries
 import time  # Library for time-related functions
 import torch  # Library for tensor computations and GPU support
-from PIL import Image  # Library for image processing
 from transformers import AutoModel, AutoTokenizer  # Hugging Face libraries for model and tokenizer
 from huggingface_hub import scan_cache_dir # Import function to scan the cache directory
+from PIL import Image  # Library for image processing
 
 # Start the stopwatch
 start_time = time.time()
+
+# Set a manual seed for reproducibility
+torch.manual_seed(100)
 
 # Define the model name
 model_name = 'openbmb/MiniCPM-o-2_6'
 print(f"Model name: {model_name}")
 
-# Check if CUDA is available and set the device accordingly
+# Check if CUDA is available and choose the appropriate device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Device: {device}")
 
-# Set a manual seed for reproducibility
-torch.manual_seed(100)
-
 # Load the pretrained vision-language model from Hugging Face model hub
 model = AutoModel.from_pretrained(model_name, trust_remote_code=True, attn_implementation='sdpa', torch_dtype=torch.bfloat16)  # Load model with specific attention implementation and data type
+model = model.eval().to(device)  # Set model to evaluation mode and move it to the appropriate device GPU or CPU
 
 # Calculate the number of parameters
 param_size = sum(p.numel() for p in model.parameters())
@@ -46,8 +47,6 @@ else:
 print(f"Parameter size: {param_size}")
 print(f"File size: {file_size}")
 
-model = model.eval().to(device)  # Set model to evaluation mode and move it to the appropriate device GPU or CPU
-
 # Load the tokenizer for the model
 tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
 
@@ -55,18 +54,20 @@ tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
 image = Image.open(r"C:\sise.jpeg").convert('RGB')  # Convert image to RGB format
 
 # First round chat
-question = "What is the landform in the picture?"  # Define the question to ask about the image
+question = "What is in the image?"  # Define the question to ask about the image
 msgs = [{'role': 'user', 'content': [image, question]}]  # Create a message with the image and question
 
 # Measure response time
 response_start_time = time.time()
 # Generate an answer using the model's chat method
-answer = model.chat(
+response = model.chat(
     msgs=msgs,  # Pass the messages to the model
     tokenizer=tokenizer  # Use the tokenizer for processing
 )
 response_time = time.time() - response_start_time
-print(answer)  # Print the generated answer
+
+# Print the generated response
+print("Generated Response:", response)
 
 """ # Second round chat, pass history context of multi-turn conversation
 msgs.append({"role": "assistant", "content": [answer]})  # Add the model's previous answer to the conversation history

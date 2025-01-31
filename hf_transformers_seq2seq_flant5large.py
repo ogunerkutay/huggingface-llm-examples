@@ -9,8 +9,8 @@ In this example, we will load a pretrained Seq2Seq model, tokenize input text, g
 
 # Import necessary libraries
 import time  # Library for time-related functions
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer # Import AutoModelForSeq2SeqLM and AutoTokenizer from Hugging Face
 import torch  # Import torch to check for CUDA support
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer # Import AutoModelForSeq2SeqLM and AutoTokenizer from Hugging Face
 from huggingface_hub import scan_cache_dir # Import function to scan the cache directory
 
 # Start the stopwatch
@@ -19,8 +19,8 @@ start_time = time.time()
 # Set a manual seed for reproducibility
 torch.manual_seed(100)
 
-# Load google/flan-t5-large model and tokenizer
-model_name = "google/flan-t5-large"  # Example model; you can replace it with any other Seq2Seq model
+# Define the model name
+model_name = "google/flan-t5-large"
 print(f"Model name: {model_name}")
 
 # Check if CUDA is available and choose the appropriate device
@@ -28,7 +28,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Device: {device}")
 
 # Load the model and move it to the device (GPU if available)
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name).to(device).eval()  # Move model to GPU or CPU and set to evaluation mode
+model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+model = model.eval().to(device)  # Set model to evaluation mode and move it to the appropriate device GPU or CPU
 
 # Calculate the number of parameters
 param_size = sum(p.numel() for p in model.parameters())
@@ -50,11 +51,11 @@ print(f"File size: {file_size}")
 # Load the tokenizer for the model
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-# Input text to be processed by the model
-input_text = "What is the capital of France?"
+# Prompt for the model to process
+prompt = "What is the capital of France?"
 
-# Tokenize the input text to convert it into a format the model can understand (input_ids)
-inputs = tokenizer(input_text, return_tensors="pt")  # 'pt' stands for PyTorch tensors
+# Tokenize the prompt to convert it into a format the model can understand (input token ids)
+inputs = tokenizer(prompt, return_tensors="pt")  # 'pt' stands for PyTorch tensors
 
 # Move inputs to the same device as the model (GPU if available)
 inputs = {key: value.to(device) for key, value in inputs.items()}
@@ -62,14 +63,13 @@ inputs = {key: value.to(device) for key, value in inputs.items()}
 # Measure response time
 response_start_time = time.time()
 # Generate model output using the `generate()` method to get human-readable text
-generated_ids = model.generate(**inputs, max_length=50)
+model_output = model.generate(**inputs, max_length=50)
+# Decode the generated output to human-readable text
+response = tokenizer.decode(model_output[0], skip_special_tokens=True)
 response_time = time.time() - response_start_time
 
-# Decode the generated IDs back into human-readable text
-generated_text = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
-
-# Print the final generated text
-print(generated_text)
+# Print the generated response
+print("Generated Response:", response)
 
 # Stop the stopwatch
 elapsed_time = time.time() - start_time
