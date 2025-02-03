@@ -26,13 +26,14 @@ print(f"Model name: {model_name}")
 device = "cpu"  # Set the device to CPU
 print(f"Device: {device}")
 
+# Load the pretrained LLaMA GGUF model
 model = Llama.from_pretrained(
-    repo_id= model_name,
-    filename="Model-7.6B-Q5_K_M.gguf",
-    n_ctx=0,
-    temperature=0.01,
-    top_p=1,
-    verbose=False
+    repo_id= model_name,  # The repository ID of the model on Hugging Face Hub
+    filename="Model-7.6B-Q5_K_M.gguf",  # The filename of the GGUF model file
+    n_ctx=0,  # The context length for the model (0 means default context length)
+    temperature=0.01,  # The temperature for sampling (lower values make the output more deterministic)
+    top_p=1,  # The cumulative probability for nucleus sampling (1 means no nucleus sampling)
+    verbose=False  # Whether to print verbose logs during model loading
 )
 
 # Retrieve the parameter size

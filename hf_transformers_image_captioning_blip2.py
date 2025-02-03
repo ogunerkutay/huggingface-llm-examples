@@ -28,8 +28,12 @@ print(f"Device: {device}")
 
 # Load the BLIP-2 processor and model from the Hugging Face model hub
 processor = Blip2Processor.from_pretrained(model_name)  # Load the processor for the image captioning model
-model = Blip2ForConditionalGeneration.from_pretrained(model_name)
-model = model.eval().to(device)  # Set model to evaluation mode and move it to the appropriate device GPU or CPU
+model = Blip2ForConditionalGeneration.from_pretrained(
+    model_name,
+    device_map="auto"  # Automatically distribute model layers across devices CPU and CUDA
+    )
+
+model = model.eval()  # Set the model to evaluation mode for inference
 
 # Calculate the number of parameters
 param_size = sum(p.numel() for p in model.parameters())

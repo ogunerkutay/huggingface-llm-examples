@@ -24,8 +24,12 @@ print(f"Model name: {model_name}")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Device: {device}")
 
-model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
-model = model.eval().to(device)
+model = AutoModelForCausalLM.from_pretrained(
+    model_name,
+    device_map="auto",  # Automatically distribute model layers across devices CPU and CUDA
+    )
+
+model = model.eval()  # Set the model to evaluation mode for inference
 
 param_size = sum(p.numel() for p in model.parameters())
 
@@ -40,7 +44,7 @@ print(f"File size: {file_size}")
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 prompt = "What is the capital of France?"
-inputs = tokenizer(prompt, return_tensors="pt").to(device)
+inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 
 response_start_time = time.time()
 outputs = model.generate(**inputs)

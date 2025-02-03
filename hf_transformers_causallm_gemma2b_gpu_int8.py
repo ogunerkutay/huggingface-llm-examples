@@ -24,9 +24,23 @@ print(f"Model name: {model_name}")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Device: {device}")
 
-quantization_config = BitsAndBytesConfig(load_in_8bit=True)
-model = AutoModelForCausalLM.from_pretrained(model_name, quantization_config=quantization_config)
-model = model.eval().to(device)
+# Configure BitsAndBytes quantization for 8-bit precision (LLM.int8)
+quantization_config = BitsAndBytesConfig(
+    load_in_8bit=True,                     # Enable 8-bit quantization to reduce memory usage while keeping good precision
+    llm_int8_has_fp16_weight=True,         # Keep some weights in FP16 for higher accuracy
+    llm_int8_skip_modules=["lm_head"],     # Skip quantization for output layers (if needed, useful for model accuracy)
+    llm_int8_threshold=6.0,                # Threshold for mixed precision quantization (default is 6.0)
+    llm_int8_enable_fp32_cpu_offload=True  # Enable FP32 offloading to CPU for better memory efficiency
+)
+
+model = AutoModelForCausalLM.from_pretrained(
+    model_name,
+    device_map="auto",  # Automatically distribute model layers across devices CPU and CUDA
+    quantization_config=quantization_config,
+    torch_dtype=torch.bfloat16 # Use bfloat16 for faster computation
+    )
+
+model = model.eval()  # Set the model to evaluation mode for inference
 
 param_size = sum(p.numel() for p in model.parameters())
 
@@ -41,7 +55,7 @@ print(f"File size: {file_size}")
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 prompt = "What is the capital of France?"
-inputs = tokenizer(prompt, return_tensors="pt").to(device)
+inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 
 response_start_time = time.time()
 outputs = model.generate(**inputs)

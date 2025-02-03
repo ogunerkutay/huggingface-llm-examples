@@ -7,15 +7,22 @@ import os
 import time
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from huggingface_hub import login, scan_cache_dir
+from huggingface_hub import login  # Import login function from Hugging Face Hub
+from huggingface_hub import scan_cache_dir # Import function to scan the cache directory
 
+# Log in to Hugging Face Hub using environment variable
+# The model 'google/gemma-2b' is in a gated repository, which means access is restricted.
+# You need to be authenticated to access it. Ensure you have set the HUGGINGFACE_HUB_TOKEN environment variable with your API token.
 token = os.getenv("HUGGINGFACE_HUB_TOKEN")
 if token:
     login(token=token)
 else:
     print("HUGGINGFACE_HUB_TOKEN environment variable is not set.")
 
+# Start the stopwatch
 start_time = time.time()
+
+# Set a manual seed for reproducibility
 torch.manual_seed(100)
 
 model_name = 'google/gemma-2b'
@@ -24,11 +31,14 @@ print(f"Model name: {model_name}")
 device = torch.device("cpu")
 print(f"Device: {device}")
 
+# Load model directly
 model = AutoModelForCausalLM.from_pretrained(model_name)
-model = model.eval().to(device)
+model = model.eval().to(device)  # Set model to evaluation mode and move it to the appropriate device GPU or CPU
 
+# Calculate the number of parameters
 param_size = sum(p.numel() for p in model.parameters())
 
+# Get cache information
 cache_info = scan_cache_dir()
 model_cache_info = next((item for item in cache_info.repos if model_name in item.repo_id), None)
 
@@ -40,7 +50,7 @@ print(f"File size: {file_size}")
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 prompt = "What is the capital of France?"
-inputs = tokenizer(prompt, return_tensors="pt")
+inputs = tokenizer(prompt, return_tensors="pt").to(model.device)  
 
 response_start_time = time.time()
 outputs = model.generate(**inputs)

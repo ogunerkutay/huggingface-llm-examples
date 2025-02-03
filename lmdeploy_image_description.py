@@ -30,7 +30,11 @@ print(f"Device: {device}")
 config = TurbomindEngineConfig(session_len=8192)
 
 # Create a vision-language model pipeline for the model with specific backend configuration
-vl_pipeline = pipeline(model_name, backend_config=config)  # Initialize pipeline with model and configuration
+vl_pipeline = pipeline(
+    model_name,
+    device_map="auto",  # Automatically distribute model layers across devices CPU and CUDA
+    backend_config=config
+    )  # Initialize pipeline with model and configuration
 
 # Calculate the number of parameters
 param_size = sum(p.numel() for p in vl_pipeline.parameters())

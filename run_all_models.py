@@ -10,7 +10,6 @@ import pandas as pd # Library for data manipulation and analysis
 # List of scripts to run
 scripts = [
         "hf_transformers_causallm_gemma2b_cpu.py",
-        "hf_transformers_causallm_gemma2b_flash_attention2.py",
         "hf_transformers_causallm_gemma2b_gpu_4bit.py",
         "hf_transformers_causallm_gemma2b_gpu_bfloat16.py",
         "hf_transformers_causallm_gemma2b_gpu_float16.py",

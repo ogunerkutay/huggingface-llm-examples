@@ -28,8 +28,12 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Device: {device}")
 
 # Load the model and move it to the device (GPU if available)
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-model = model.eval().to(device)  # Set model to evaluation mode and move it to the appropriate device GPU or CPU
+model = AutoModelForSeq2SeqLM.from_pretrained(
+    model_name,
+    device_map="auto",  # Automatically distribute model layers across devices CPU and CUDA
+    )
+
+model = model.eval()  # Set the model to evaluation mode for inference
 
 # Calculate the number of parameters
 param_size = sum(p.numel() for p in model.parameters())

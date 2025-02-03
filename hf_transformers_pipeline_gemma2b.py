@@ -4,10 +4,18 @@ This script uses the Hugging Face Transformers library to load and run the 'gemm
 """
 
 # Import necessary libraries
+import os  # Library for interacting with the operating system
 import time  # Library for time-related functions
 import torch  # Import torch to check for CUDA support
 from transformers import pipeline # Import pipeline from Hugging Face
 from huggingface_hub import scan_cache_dir # Import function to scan the cache directory
+from huggingface_hub import login # Import function to login to the Hugging Face Hub
+
+token = os.getenv("HUGGINGFACE_HUB_TOKEN")
+if token:
+    login(token=token)
+else:
+    print("HUGGINGFACE_HUB_TOKEN environment variable is not set.")
 
 # Start the stopwatch
 start_time = time.time()
@@ -24,7 +32,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Device: {device}")
 
 # Use a pipeline as a high-level helper
-pipe = pipeline("text-generation", model=model_name)
+pipe = pipeline(
+    "text-generation",
+    model=model_name,
+    device_map="auto",  # Automatically distribute model layers across devices CPU and CUDA
+    )
 
 # Calculate the number of parameters
 param_size = sum(p.numel() for p in pipe.model.parameters())

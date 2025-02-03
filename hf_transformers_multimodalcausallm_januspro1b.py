@@ -30,11 +30,17 @@ print(f"Device: {device}")
 vl_chat_processor: VLChatProcessor = VLChatProcessor.from_pretrained(model_name) # Load the processor for the multimodal causal language model
 tokenizer = vl_chat_processor.tokenizer # Get the tokenizer from the processor
 
-vl_gpt: MultiModalityCausalLM = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True)
-vl_gpt = vl_gpt.to(torch.bfloat16).eval().to(device)  # Set model to evaluation mode and move it to the appropriate device GPU or CPU
+model: MultiModalityCausalLM = AutoModelForCausalLM.from_pretrained(
+    model_name,
+    device_map="auto",  # Automatically distribute model layers across devices CPU and CUDA
+    torch_dtype=torch.bfloat16,
+    trust_remote_code=True
+    )
+
+model = model.eval()  # Set the model to evaluation mode for inference
 
 # Calculate the number of parameters
-param_size = sum(p.numel() for p in vl_gpt.parameters())
+param_size = sum(p.numel() for p in model.parameters())
 
 # Get cache information
 cache_info = scan_cache_dir()
@@ -66,15 +72,15 @@ conversation = [
 pil_images = load_pil_images(conversation)
 prepare_inputs = vl_chat_processor(
     conversations=conversation, images=pil_images, force_batchify=True
-).to(vl_gpt.device)
+).to(model.device)
 
 # Measure response time
 response_start_time = time.time()
 # # run image encoder to get the image embeddings
-inputs_embeds = vl_gpt.prepare_inputs_embeds(**prepare_inputs)
+inputs_embeds = model.prepare_inputs_embeds(**prepare_inputs)
 
 # # run the model to get the response
-outputs = vl_gpt.language_model.generate(
+outputs = model.language_model.generate(
     inputs_embeds=inputs_embeds,
     attention_mask=prepare_inputs.attention_mask,
     pad_token_id=tokenizer.eos_token_id,

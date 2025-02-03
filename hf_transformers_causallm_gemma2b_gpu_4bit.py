@@ -7,15 +7,22 @@ import os
 import time
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
-from huggingface_hub import login, scan_cache_dir
+from huggingface_hub import login  # Import login function from Hugging Face Hub
+from huggingface_hub import scan_cache_dir # Import function to scan the cache directory
 
+# Log in to Hugging Face Hub using environment variable
+# The model 'google/gemma-2b' is in a gated repository, which means access is restricted.
+# You need to be authenticated to access it. Ensure you have set the HUGGINGFACE_HUB_TOKEN environment variable with your API token.
 token = os.getenv("HUGGINGFACE_HUB_TOKEN")
 if token:
     login(token=token)
 else:
     print("HUGGINGFACE_HUB_TOKEN environment variable is not set.")
 
+# Start the stopwatch
 start_time = time.time()
+
+# Set a manual seed for reproducibility
 torch.manual_seed(100)
 
 model_name = 'google/gemma-2b'
@@ -52,21 +59,24 @@ bnb_quantization_config = BitsAndBytesConfig(
     load_in_4bit=True,                      # Enable 4-bit quantization to reduce model size and memory usage
     bnb_4bit_use_double_quant=True,         # Use double quantization for further compression, reducing memory usage
     bnb_4bit_quant_type="nf4",              # Use Normal Float 4 (NF4) format, optimized for deep learning tasks
-    bnb_4bit_compute_dtype=torch.float16,  # Specify computation to be done in bfloat16 precision for better memory efficiency and speed
+    bnb_4bit_compute_dtype=torch.bfloat16,  # Specify computation to be done in bfloat16 precision for better memory efficiency and speed
     low_cpu_mem_usage=True                  # Explicitly set low_cpu_mem_usage to True for efficient CPU memory usage
 )
 
 # Load the model with the specified quantization configuration and the torch_dtype set to bfloat16
 model = AutoModelForCausalLM.from_pretrained(
-    model_name, 
+    model_name,
+    device_map="auto",  # Automatically distribute model layers across devices CPU and CUDA
     quantization_config=bnb_quantization_config,  # Apply the BitsAndBytes quantization configuration
-    torch_dtype=torch.float16  # Set the dtype for model parameters and activations to bfloat16
+    torch_dtype=torch.bfloat16  # Set the dtype for model parameters and activations to bfloat16
 )
 
-model = model.eval().to(device)
+model = model.eval()  # Set the model to evaluation mode for inference
 
+# Calculate the number of parameters
 param_size = sum(p.numel() for p in model.parameters())
 
+# Get cache information
 cache_info = scan_cache_dir()
 model_cache_info = next((item for item in cache_info.repos if model_name in item.repo_id), None)
 
@@ -78,7 +88,7 @@ print(f"File size: {file_size}")
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 prompt = "What is the capital of France?"
-inputs = tokenizer(prompt, return_tensors="pt").to(device)
+inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 
 response_start_time = time.time()
 outputs = model.generate(**inputs)

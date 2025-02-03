@@ -27,8 +27,15 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Device: {device}")
 
 # Load the pretrained vision-language model from Hugging Face model hub
-model = AutoModel.from_pretrained(model_name, trust_remote_code=True, attn_implementation='sdpa', torch_dtype=torch.bfloat16)  # Load model with specific attention implementation and data type
-model = model.eval().to(device)  # Set model to evaluation mode and move it to the appropriate device GPU or CPU
+model = AutoModel.from_pretrained(
+    model_name,
+    device=device,  # Choose the device (CPU or GPU) for running the model
+    attn_implementation='sdpa', # Use the 'sdpa' attention implementation for faster inference
+    torch_dtype=torch.bfloat16,
+    trust_remote_code=True,
+    )  # Load model with specific attention implementation and data type
+
+model = model.eval().to(device)  # Set the model to evaluation mode for inference
 
 # Calculate the number of parameters
 param_size = sum(p.numel() for p in model.parameters())
@@ -70,7 +77,7 @@ response_time = time.time() - response_start_time
 print("Generated Response:", response)
 
 """ # Second round chat, pass history context of multi-turn conversation
-msgs.append({"role": "assistant", "content": [answer]})  # Add the model's previous answer to the conversation history
+msgs.append({"role": "assistant", "content": [response]})  # Add the model's previous answer to the conversation history
 msgs.append({"role": "user", "content": ["What should I pay attention to when traveling here?"]})  # Add a new question
 
 # Measure response time for second round
