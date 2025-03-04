@@ -47,10 +47,12 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 prompt = "What is the capital of France?"
 inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 
-response_start_time = time.time()
-outputs = model.generate(**inputs)
-response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-response_time = time.time() - response_start_time
+# Use autocast for mixed precision during the model generation
+with torch.autocast(device_type=str(device), dtype=torch.bfloat16):
+    response_start_time = time.time()
+    outputs = model.generate(**inputs)
+    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    response_time = time.time() - response_start_time
 
 print("Generated Response:", response)
 
