@@ -9,9 +9,10 @@ This project is designed to facilitate the use of various large language models 
 The project is organized into the following directories and files:
 
 - **CODE/**: Contains Python scripts for running various models and checking system capabilities.
+  - `cache_analyzer.py`: Analyzes the Hugging Face Hub cache directory and provides a summary of the cached models and their sizes.
   - `check_cuda_availability.py`: Checks the availability of CUDA (GPU support) using PyTorch.
   - `hf_transformers_automodel_minicpmo.py`: Loads and runs the MiniCPM-o-2_6 model for multimodal tasks.
-  - `hf_transformers_causallm_gemma2b_*.py`: Loads and runs Gemma2B model using the AutoModelForCausalLM class.
+  - `hf_transformers_causallm_gemma2b_*.py`: Loads and runs Gemma2B model using the AutoModelForCausalLM class with different configurations (GPU, CPU, quantization).
   - `hf_transformers_causallm_gpt2.py`: Loads and runs the GPT-2 model using the AutoModelForCausalLM class.
   - `hf_transformers_embed_bert.py`: Loads and runs a BERT model for embedding extraction using Hugging Face's AutoModel.
   - `hf_transformers_image_captioning_blip2.py`: Loads and runs the BLIP-2 model for image captioning tasks.
@@ -95,6 +96,8 @@ To use the scripts in this project, ensure you have the necessary dependencies i
 - Python 3.x
 - PyTorch
 - Transformers library from Hugging Face
+- Rich
+- Tabulate
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for more details.
