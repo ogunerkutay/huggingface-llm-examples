@@ -59,13 +59,15 @@ image = Image.open(r"C:\sise.jpeg")
 inputs = processor(image, return_tensors="pt").to(device)  # Move inputs to the same device as the model (GPU if available)
 
 with torch.inference_mode(): # Set the model to inference mode, better than torch.no_grad() for inference
-    # Measure response time
-    response_start_time = time.time()
-    # Generate a caption for the input image using the model's generate() method
-    outputs = model.generate(**inputs, max_new_tokens=100)
-    # Decode the generated output to human-readable text
-    caption = processor.decode(outputs[0], skip_special_tokens=True)
-    response_time = time.time() - response_start_time
+    # Use autocast for mixed precision during the model generation
+    with torch.autocast(device_type=str(device), dtype=torch.bfloat16):
+        # Measure response time
+        response_start_time = time.time()
+        # Generate a caption for the input image using the model's generate() method
+        outputs = model.generate(**inputs, max_new_tokens=100)
+        # Decode the generated output to human-readable text
+        caption = processor.decode(outputs[0], skip_special_tokens=True)
+        response_time = time.time() - response_start_time
 
 # Print the final generated caption
 print(f"Image Caption: {caption}")

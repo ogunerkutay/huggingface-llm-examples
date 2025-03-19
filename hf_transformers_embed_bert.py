@@ -86,11 +86,13 @@ print("Human-readable text:", decoded_text)
 inputs = {key: value.to(device) for key, value in inputs.items()}
 
 with torch.inference_mode(): # Set the model to inference mode, better than torch.no_grad() for inference
-    # Measure response time
-    response_start_time = time.time()
-    # Generate model output (e.g., embeddings or hidden states)
-    outputs = model(**inputs)
-    response_time = time.time() - response_start_time
+    # Use autocast for mixed precision during the model generation
+    with torch.autocast(device_type=str(device), dtype=torch.bfloat16):
+        # Measure response time
+        response_start_time = time.time()
+        # Generate model output (e.g., embeddings or hidden states)
+        outputs = model(**inputs)
+        response_time = time.time() - response_start_time
 
 # Print the output (e.g., model's hidden states or embeddings)
 print("Model Output:", outputs)

@@ -1,6 +1,6 @@
 # FILE: hf_transformers_causallm_gemma2b_cpu.py
 """
-This script runs the 'gemma-2b' model on a CPU.
+This script runs the 'gemma-2b' model on multiple CPU.
 """
 
 import os
@@ -24,6 +24,9 @@ start_time = time.time()
 
 # Set a manual seed for reproducibility
 torch.manual_seed(100)
+
+# Set the number of threads PyTorch will use for CPU operations
+torch.set_num_threads(os.cpu_count())  # Or experiment with other values
 
 model_name = 'google/gemma-2b'
 print(f"Model name: {model_name}")
@@ -52,7 +55,7 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 prompt = "What is the capital of France?"
 inputs = tokenizer(prompt, return_tensors="pt").to(model.device)  
 
-with torch.inference_mode(): # Set the model to inference mode, better than torch.no_grad() for inference
+with torch.inference_mode(): # Set the model to inference mode, better than torch.no_grad() for inference, but not beneficial for cpu #   with torch.autocast(device_type=str(device), dtype=torch.bfloat16): slows down for cpu inference
     response_start_time = time.time()
     outputs = model.generate(**inputs)
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)

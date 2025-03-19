@@ -27,7 +27,6 @@ print(f"Device: {device}")
 # Configure BitsAndBytes quantization for 8-bit precision (LLM.int8)
 quantization_config = BitsAndBytesConfig(
     load_in_8bit=True,                     # Enable 8-bit quantization to reduce memory usage while keeping good precision
-    llm_int8_has_fp16_weight=True,         # Keep some weights in FP16 for higher accuracy
     llm_int8_skip_modules=["lm_head"],     # Skip quantization for output layers (if needed, useful for model accuracy)
     llm_int8_threshold=6.0,                # Threshold for mixed precision quantization (default is 6.0)
     llm_int8_enable_fp32_cpu_offload=True  # Enable FP32 offloading to CPU for better memory efficiency
@@ -57,11 +56,10 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 prompt = "What is the capital of France?"
 inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 
-with torch.inference_mode(): # Set the model to inference mode, better than torch.no_grad() for inference
-    response_start_time = time.time()
-    outputs = model.generate(**inputs)
-    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    response_time = time.time() - response_start_time
+response_start_time = time.time()
+outputs = model.generate(**inputs)
+response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+response_time = time.time() - response_start_time
 
 print("Generated Response:", response)
 

@@ -65,13 +65,15 @@ prompt = "What is the capital of France?"
 inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 
 with torch.inference_mode(): # Set the model to inference mode, better than torch.no_grad() for inference
-    # Measure response time
-    response_start_time = time.time()
-    # Generate model output using the `generate()` method to get human-readable text
-    outputs = model.generate(**inputs, max_length=50)
-    # Decode the generated output to human-readable text
-    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    response_time = time.time() - response_start_time
+    # Use autocast for mixed precision during the model generation
+    with torch.autocast(device_type=str(device), dtype=torch.bfloat16):
+        # Measure response time
+        response_start_time = time.time()
+        # Generate model output using the `generate()` method to get human-readable text
+        outputs = model.generate(**inputs, max_length=50)
+        # Decode the generated output to human-readable text
+        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        response_time = time.time() - response_start_time
 
 # Print the generated response
 print("Generated Response:", response)

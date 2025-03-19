@@ -65,13 +65,15 @@ inputs = tokenizer(prompt, return_tensors="pt")  # 'pt' stands for PyTorch tenso
 inputs = {key: value.to(device) for key, value in inputs.items()}
 
 with torch.inference_mode(): # Set the model to inference mode, better than torch.no_grad() for inference
-    # Measure response time
-    response_start_time = time.time()
-    # Generate model output using the `generate()` method to get human-readable text
-    model_output = model.generate(**inputs, max_length=50)
-    # Decode the generated output to human-readable text
-    response = tokenizer.decode(model_output[0], skip_special_tokens=True)
-    response_time = time.time() - response_start_time
+    # Use autocast for mixed precision during the model generation
+    with torch.autocast(device_type=str(device), dtype=torch.bfloat16):
+        # Measure response time
+        response_start_time = time.time()
+        # Generate model output using the `generate()` method to get human-readable text
+        model_output = model.generate(**inputs, max_length=50)
+        # Decode the generated output to human-readable text
+        response = tokenizer.decode(model_output[0], skip_special_tokens=True)
+        response_time = time.time() - response_start_time
 
 # Print the generated response
 print("Generated Response:", response)

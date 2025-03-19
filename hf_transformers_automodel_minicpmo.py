@@ -64,14 +64,17 @@ image = Image.open(r"C:\sise.jpeg").convert('RGB')  # Convert image to RGB forma
 question = "What is in the image?"  # Define the question to ask about the image
 msgs = [{'role': 'user', 'content': [image, question]}]  # Create a message with the image and question
 
-# Measure response time
-response_start_time = time.time()
-# Generate an answer using the model's chat method
-response = model.chat(
-    msgs=msgs,  # Pass the messages to the model
-    tokenizer=tokenizer  # Use the tokenizer for processing
-)
-response_time = time.time() - response_start_time
+with torch.inference_mode(): # Set the model to inference mode, better than torch.no_grad() for inference
+    # Use autocast for mixed precision during the model generation
+    with torch.autocast(device_type=str(device), dtype=torch.bfloat16):
+        # Measure response time
+        response_start_time = time.time()
+        # Generate an answer using the model's chat method
+        response = model.chat(
+            msgs=msgs,  # Pass the messages to the model
+            tokenizer=tokenizer  # Use the tokenizer for processing
+        )
+        response_time = time.time() - response_start_time
 
 # Print the generated response
 print("Generated Response:", response)

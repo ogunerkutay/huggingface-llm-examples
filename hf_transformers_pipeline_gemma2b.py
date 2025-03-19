@@ -36,6 +36,7 @@ pipe = pipeline(
     "text-generation",
     model=model_name,
     device_map="auto",  # Automatically distribute model layers across devices CPU and CUDA
+    torch_dtype=torch.bfloat16 # Specify the data type for the model
     )
 
 # Calculate the number of parameters
@@ -57,12 +58,15 @@ print(f"File size: {file_size}")
 
 # Prompt for the model to process
 prompt = "What is the capital of France?"
+
 with torch.inference_mode(): # Set the model to inference mode, better than torch.no_grad() for inference
-    # Measure response time
-    response_start_time = time.time()
-    # Generate response using the pipeline
-    response = pipe(prompt, max_length=50, truncation=True)
-    response_time = time.time() - response_start_time
+    # Use autocast for mixed precision during the model generation
+    with torch.autocast(device_type=str(device), dtype=torch.bfloat16):
+        # Measure response time
+        response_start_time = time.time()
+        # Generate response using the pipeline
+        response = pipe(prompt, max_length=50, truncation=True)
+        response_time = time.time() - response_start_time
 
 # Print the generated response
 print("Generated Response:", response)

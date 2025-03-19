@@ -61,11 +61,13 @@ image_path = r"C:\sise.jpeg"
 image = load_image(image_path)
 
 with torch.inference_mode(): # Set the model to inference mode, better than torch.no_grad() for inference
-    # Measure response time
-    response_start_time = time.time()
-    # Generate a description for the input image using the pipeline
-    response = vl_pipeline(('describe this image', image))  # Generate description for the image
-    response_time = time.time() - response_start_time
+    # Use autocast for mixed precision during the model generation
+    with torch.autocast(device_type=str(device), dtype=torch.bfloat16):
+        # Measure response time
+        response_start_time = time.time()
+        # Generate a description for the input image using the pipeline
+        response = vl_pipeline(('describe this image', image))  # Generate description for the image
+        response_time = time.time() - response_start_time
 
 # Print the generated description
 print(f"Image Description: {response}")  # Print the generated text response
