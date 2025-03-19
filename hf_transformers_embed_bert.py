@@ -95,10 +95,6 @@ with torch.inference_mode(): # Set the model to inference mode, better than torc
         response_time = time.time() - response_start_time
 
 # Print the output (e.g., model's hidden states or embeddings)
-print("Model Output:", outputs)
-
-# Stop the stopwatch
-elapsed_time = time.time() - start_time
-
-print(f"Total execution time: {elapsed_time:.2f} seconds")
+print("Generated Response:", outputs)
 print(f"Response generation time: {response_time:.2f} seconds")
+print(f"Total execution time: {time.time() - start_time:.2f} seconds")

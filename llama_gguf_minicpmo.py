@@ -70,9 +70,5 @@ response_time = time.time() - response_start_time
 # Print the generated response
 #print("Generated Response:", response['choices'][0]['message']['content'])
 print("Generated Response:", response['choices'][0]['text'].split('\n')[0].strip())
-
-# Stop the stopwatch
-elapsed_time = time.time() - start_time
-
-print(f"Total execution time: {elapsed_time:.2f} seconds")
 print(f"Response generation time: {response_time:.2f} seconds")
+print(f"Total execution time: {time.time() - start_time:.2f} seconds")

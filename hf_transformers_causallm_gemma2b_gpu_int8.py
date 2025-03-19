@@ -54,6 +54,8 @@ print(f"File size: {file_size}")
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 prompt = "What is the capital of France?"
+print(f"Prompt: {prompt}")
+
 inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 
 response_start_time = time.time()
@@ -62,7 +64,5 @@ response = tokenizer.decode(outputs[0], skip_special_tokens=True)
 response_time = time.time() - response_start_time
 
 print("Generated Response:", response)
-
-elapsed_time = time.time() - start_time
-print(f"Total execution time: {elapsed_time:.2f} seconds")
 print(f"Response generation time: {response_time:.2f} seconds")
+print(f"Total execution time: {time.time() - start_time:.2f} seconds")

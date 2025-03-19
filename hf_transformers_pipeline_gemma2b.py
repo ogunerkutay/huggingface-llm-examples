@@ -70,9 +70,5 @@ with torch.inference_mode(): # Set the model to inference mode, better than torc
 
 # Print the generated response
 print("Generated Response:", response)
-
-# Stop the stopwatch
-elapsed_time = time.time() - start_time
-
-print(f"Total execution time: {elapsed_time:.2f} seconds")
 print(f"Response generation time: {response_time:.2f} seconds")
+print(f"Total execution time: {time.time() - start_time:.2f} seconds")

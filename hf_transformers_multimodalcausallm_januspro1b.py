@@ -98,10 +98,6 @@ response = tokenizer.decode(outputs[0].cpu().tolist(), skip_special_tokens=True)
 
 response_time = time.time() - response_start_time
 
-print(f"{prepare_inputs['sft_format'][0]}", response)
-
-# Stop the stopwatch
-elapsed_time = time.time() - start_time
-
-print(f"Total execution time: {elapsed_time:.2f} seconds")
+print(f"Generated Response: {prepare_inputs['sft_format'][0]}", response)
 print(f"Response generation time: {response_time:.2f} seconds")
+print(f"Total execution time: {time.time() - start_time:.2f} seconds")
