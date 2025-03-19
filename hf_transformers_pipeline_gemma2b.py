@@ -57,12 +57,12 @@ print(f"File size: {file_size}")
 
 # Prompt for the model to process
 prompt = "What is the capital of France?"
-
-# Measure response time
-response_start_time = time.time()
-# Generate response using the pipeline
-response = pipe(prompt, max_length=50, truncation=True)
-response_time = time.time() - response_start_time
+with torch.inference_mode(): # Set the model to inference mode, better than torch.no_grad() for inference
+    # Measure response time
+    response_start_time = time.time()
+    # Generate response using the pipeline
+    response = pipe(prompt, max_length=50, truncation=True)
+    response_time = time.time() - response_start_time
 
 # Print the generated response
 print("Generated Response:", response)
